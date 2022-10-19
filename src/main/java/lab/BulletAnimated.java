@@ -5,7 +5,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-public class BulletAnimated  {
+public class BulletAnimated implements DrawableSimulable, Collisionable {
 
 	private Point2D position;
 	private Point2D start;
@@ -41,6 +41,7 @@ public class BulletAnimated  {
 				true, true);
 	}
 
+	@Override
 	public void draw(GraphicsContext gc) {
 		gc.save();
 		Point2D canvasPosition = world.getCanvasPoint(position);
@@ -48,6 +49,7 @@ public class BulletAnimated  {
 		gc.restore();
 	}
 
+	@Override
 	public void simulate(double deltaT) {
 		if (accelerate && start.distance(position) < cannonLength) {
 			double cannonAngle = cannon.getAngle(); 
@@ -72,6 +74,24 @@ public class BulletAnimated  {
 		} else {
 			reload();
 		}		
+	}
+	
+	@Override
+	public Rectangle2D getBB() {
+		return getBoundingBox();
+	}
+	
+	@Override
+	public boolean isInCollisionWith(Collisionable other) {
+		return getBB().intersects(other.getBB());
+	}
+	
+	@Override
+	public void hitBy(Collisionable other) {
+		if (other instanceof Dragon) {
+			reload();
+		}
+		
 	}
 
 	public Rectangle2D getBoundingBox() {

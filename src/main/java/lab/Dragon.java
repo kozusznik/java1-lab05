@@ -4,7 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 
-public class Dragon {
+public class Dragon implements DrawableSimulable, Collisionable{
 	
 	private Point2D position;
 	
@@ -21,18 +21,36 @@ public class Dragon {
 		this.speed = speed;
 	}
 
-	
+	@Override
 	public void draw(GraphicsContext gc) {
 		Point2D canvasPosition = world.getCanvasPoint(position);
 		gc.drawImage(Constants.DRAGON_IMAGE, canvasPosition.getX(), canvasPosition.getY(), size, size);
 	}
 
-
+	@Override
 	public void simulate(double timeDelta) {
 		double timeDeltaS = timeDelta;
 		double newX = (position.getX() + speed.getX() * timeDeltaS + world.getWidth()) % world.getWidth(); 
 		double newY = (position.getY() + speed.getY() * timeDeltaS + world.getHeight()) % world.getHeight();
 		position = new Point2D(newX, newY);
+	}
+	
+	
+	@Override
+	public Rectangle2D getBB() {
+		return getBoundingBox();
+	}
+	
+	@Override
+	public boolean isInCollisionWith(Collisionable other) {
+		return getBB().intersects(other.getBB());
+	}
+	
+	@Override
+	public void hitBy(Collisionable other) {
+		if (other instanceof BulletAnimated) {
+			hit();
+		}
 	}
 
 

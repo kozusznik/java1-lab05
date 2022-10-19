@@ -6,17 +6,17 @@ import javafx.scene.canvas.GraphicsContext;
 public class World {
 	private double width;
 	private double height;
-	private BulletAnimated bulletAnimatted;
-	private Cannon cannon;
-	private Dragon[] dragons;
-
+	private DrawableSimulable[] objects;
 	public World(double width, double height) {
 		super();
 		this.width = width;
 		this.height = height;
-		cannon = new Cannon(this, new Point2D(50, 50), new Point2D(100, 20));
-		bulletAnimatted = new BulletAnimated(this, cannon, new Point2D(30, 60), new Point2D(0, 0), 40);
-		dragons = new Dragon[] { new Dragon(this, new Point2D(50, 200), new Point2D(100, 5)),
+		
+		
+		Cannon cannon = new Cannon(this, new Point2D(50, 50), new Point2D(100, 20));
+		BulletAnimated bulletAnimatted = new BulletAnimated(this, cannon, new Point2D(30, 60), new Point2D(0, 0), 40);
+		objects = new DrawableSimulable[] {cannon, bulletAnimatted
+				, new Dragon(this, new Point2D(50, 200), new Point2D(100, 5)),
 				new Dragon(this, new Point2D(50, 230), new Point2D(60, 5)),
 				new Dragon(this, new Point2D(50, 270), new Point2D(-50, 20)) };
 	}
@@ -27,22 +27,28 @@ public class World {
 
 	public void draw(GraphicsContext gc) {
 		gc.clearRect(0, 0, width, height);
-		cannon.draw(gc);
-		bulletAnimatted.draw(gc);
-		for(Dragon dragon: dragons) {
-			dragon.draw(gc);
+		for (DrawableSimulable drawableSimulable : objects) {
+			drawableSimulable.draw(gc);
 		}
 	}
 
 	public void simulate(double timeDelta) {
-		bulletAnimatted.simulate(timeDelta);
-		cannon.simulate(timeDelta);
-		for(Dragon dragon: dragons) {
-			if (bulletAnimatted.overlaps(dragon)) {
-				dragon.hit();
-				bulletAnimatted.reload();
+		for (DrawableSimulable drawableSimulable : objects) {
+			drawableSimulable.simulate(timeDelta);
+		}
+	
+		for (DrawableSimulable drawableSimulable : objects) {
+			if (drawableSimulable instanceof Collisionable o1) {
+				for (DrawableSimulable drawableSimulable2 : objects) {
+					if (drawableSimulable != drawableSimulable2 && drawableSimulable2 instanceof Collisionable o2) {
+						if (o1.isInCollisionWith(o2)) {
+							o1.hitBy(o2);
+							o2.hitBy(o1);
+						}
+					}
+				}
+				
 			}
-			dragon.simulate(timeDelta);
 		}
 	}
 
