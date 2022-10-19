@@ -5,9 +5,8 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-public class BulletAnimated implements DrawableSimulable, Collisionable {
+public class BulletAnimated extends WorldEntity implements Collisionable {
 
-	private Point2D position;
 	private Point2D start;
 	private Point2D speed;
 	private Point2D initialSpeed;
@@ -22,7 +21,6 @@ public class BulletAnimated implements DrawableSimulable, Collisionable {
 	private double dragCoefficient = 0.47;
 	
 	private Image image;
-	private World world;
 	private Cannon cannon;
 
 	public BulletAnimated(World world, Cannon cannon) {
@@ -30,23 +28,15 @@ public class BulletAnimated implements DrawableSimulable, Collisionable {
 	}
 
 	public BulletAnimated(World world, Cannon cannon, Point2D start, Point2D speed, double size) {
+		super(world, start);
 		this.start = start;
 		this.position = this.start;
 		this.initialSpeed = speed;
 		this.speed = speed;
 		this.size = size;
-		this.world = world;
 		this.cannon = cannon;
 		image = new Image(getClass().getResourceAsStream("fireball-transparent.gif"), size, size,
 				true, true);
-	}
-
-	@Override
-	public void draw(GraphicsContext gc) {
-		gc.save();
-		Point2D canvasPosition = world.getCanvasPoint(position);
-		gc.drawImage(image, canvasPosition.getX(), canvasPosition.getY());
-		gc.restore();
 	}
 
 	@Override
@@ -81,10 +71,6 @@ public class BulletAnimated implements DrawableSimulable, Collisionable {
 		return getBoundingBox();
 	}
 	
-	@Override
-	public boolean isInCollisionWith(Collisionable other) {
-		return getBB().intersects(other.getBB());
-	}
 	
 	@Override
 	public void hitBy(Collisionable other) {
@@ -98,6 +84,12 @@ public class BulletAnimated implements DrawableSimulable, Collisionable {
 		return new Rectangle2D(position.getX(), position.getY(), size, size);
 	}
 	
+	@Override
+	protected void drawInternal(GraphicsContext gc) {
+		Point2D canvasPosition = world.getCanvasPoint(position);
+		gc.drawImage(image, canvasPosition.getX(), canvasPosition.getY());
+	}
+
 	public boolean overlaps(Dragon dragon) {
 		return getBoundingBox().intersects(dragon.getBoundingBox());
 	}

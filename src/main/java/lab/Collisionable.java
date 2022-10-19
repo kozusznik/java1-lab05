@@ -6,7 +6,9 @@ public interface Collisionable {
 
 	Rectangle2D getBB();
 	
-	boolean isInCollisionWith(Collisionable other);
+	default boolean isInCollisionWith(Collisionable other) {
+		return getBB().intersects(other.getBB());
+	}
 	
 	void hitBy(Collisionable other);
 }
